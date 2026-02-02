@@ -1,0 +1,61 @@
+name: Publish Daily Intelligence Log (Closed Beta)
+
+on:
+  schedule:
+    # 10:00 PM IST = 16:30 UTC
+    - cron: '30 16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch intelligence report and create log file
+        run: |
+          SHEET_ID="10XfvJKDluB0Ese2uligODdSFX6GX60EgHQfmvFM0LBM"
+
+          INTELLIGENCE_TEXT=$(curl -s "https://docs.google.com/spreadsheets/d/$SHEET_ID/gviz/tq?tqx=out:csv&range=B2" | tr -d '\r')
+
+          if [ -z "$INTELLIGENCE_TEXT" ]; then
+            echo "Intelligence report empty. Exiting."
+            exit 0
+          fi
+
+          DATE=$(date +'%Y-%m-%d')
+
+          mkdir -p logs
+
+          printf "%s\n" \
+          "# Daily Intelligence Report" \
+          "## Project S.I.T.I. — NHE-02" \
+          "" \
+          "**Date:** $DATE" \
+          "**Observation Level:** Level 1 (Passive / Logging)" \
+          "**Human Oversight:** Enabled" \
+          "" \
+          "---" \
+          "" \
+          "## Intelligence Summary" \
+          "" \
+          "$INTELLIGENCE_TEXT" \
+          "" \
+          "---" \
+          "*Generated via governed automation. No human data included.*" \
+          > logs/$DATE.md
+
+      - name: Commit and push log
+        run: |
+          git config user.name "NHE-02 Automation"
+          git config user.email "nhe-02@writistic.studio"
+
+          git add logs/
+          git diff --cached --quiet || git commit -m "NHE-02: Daily Intelligence Log — $DATE"
+          git push
