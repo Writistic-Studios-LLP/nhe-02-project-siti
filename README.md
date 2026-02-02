@@ -14,14 +14,13 @@
 * [Ethical Learnings](ETHICS.md)
 * [Governance Rules](GOVERNANCE.md)
 * [Ecosystem Oversight](ECOSYSTEM.md)
-* [Siti’s Logs & Reports](logs/)
+* [Siti’s Intelligence Reports](logs/)
 * [FAQ](FAQ.md)
-* [Changelog](CHANGELOG.md)
-* [Ethical License](ETHICAL_LICENSE.md)
+* [Ethical License](LICENSE.md)
 * [Copyright](COPYRIGHT.md)
 * [Disclaimer](DISCLAIMER.md)
 * [PRIVACY](PRIVACY.md)
-* [Terms of Use](TERMS_OF_USE.md)
+* [Terms of Use](TERMS-OF-USE.md)
 
 ---
 
