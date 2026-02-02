@@ -1,9 +1,8 @@
-name: Publish Daily Intelligence Log (Closed Beta)
+name: Publish Daily INTEL (PR Based)
 
 on:
   schedule:
-    # 10:00 PM IST = 16:30 UTC
-    - cron: '30 16 * * *'
+    - cron: '30 16 * * *' # 10:00 PM IST
   workflow_dispatch:
 
 permissions:
@@ -12,50 +11,54 @@ permissions:
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Fetch intelligence report and create log file
+      - name: Fetch INTEL from Google Sheet and create file
         run: |
           SHEET_ID="10XfvJKDluB0Ese2uligODdSFX6GX60EgHQfmvFM0LBM"
 
-          INTELLIGENCE_TEXT=$(curl -s "https://docs.google.com/spreadsheets/d/$SHEET_ID/gviz/tq?tqx=out:csv&range=B2" | tr -d '\r')
+          INTEL_TEXT=$(curl -s "https://docs.google.com/spreadsheets/d/$SHEET_ID/gviz/tq?tqx=out:csv&range=B2" | tr -d '\r')
 
-          if [ -z "$INTELLIGENCE_TEXT" ]; then
-            echo "Intelligence report empty. Exiting."
+          if [ -z "$INTEL_TEXT" ]; then
+            echo "INTEL empty. Exiting."
             exit 0
           fi
 
           DATE=$(date +'%Y-%m-%d')
+          YEAR=$(date +'%Y')
+          MONTH=$(date +'%m')
 
-          mkdir -p logs
+          mkdir -p logs/$YEAR/$MONTH
 
           printf "%s\n" \
-          "# Daily Intelligence Report" \
-          "## Project S.I.T.I. — NHE-02" \
+          "# INTEL Entry — $DATE" \
           "" \
-          "**Date:** $DATE" \
-          "**Observation Level:** Level 1 (Passive / Logging)" \
-          "**Human Oversight:** Enabled" \
-          "" \
-          "---" \
-          "" \
-          "## Intelligence Summary" \
-          "" \
-          "$INTELLIGENCE_TEXT" \
+          "Entity: NHE-02 (Project Siti)" \
+          "Mode: Observational Intel" \
+          "Human Oversight: Enabled" \
           "" \
           "---" \
-          "*Generated via governed automation. No human data included.*" \
-          > logs/$DATE.md
+          "" \
+          "$INTEL_TEXT" \
+          "" \
+          "---" \
+          "Generated via governed automation." \
+          > logs/$YEAR/$MONTH/$DATE.md
 
-      - name: Commit and push log
-        run: |
-          git config user.name "NHE-02 Automation"
-          git config user.email "nhe-02@writistic.studio"
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: INTEL-entry-${{ github.run_id }}
+          title: "Daily INTEL Entry — ${{ github.run_started_at }}"
+          body: |
+            Automated daily INTEL entry generated from Google Sheets.
 
-          git add logs/
-          git diff --cached --quiet || git commit -m "NHE-02: Daily Intelligence Log — $DATE"
-          git push
+            - Source: Cell B2
+            - Entity: NHE-02 (Project Siti)
+            - Human Oversight: Required before merge
+          commit-message: "Add INTEL entry for today"
+          delete-branch: true
