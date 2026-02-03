@@ -2,7 +2,7 @@ name: Publish Daily INTEL (PR Based)
 
 on:
   schedule:
-    - cron: '30 16 * * *' # 10:00 PM IST
+    - cron: '30 16 * * 6' # 10:00 PM IST
   workflow_dispatch:
 
 permissions:
